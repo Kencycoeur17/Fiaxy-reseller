@@ -1,1 +1,1 @@
-# Fiaxy-reseller
+# fiaxy-reseller
