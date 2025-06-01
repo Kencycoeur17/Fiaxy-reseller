@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard FiaXY</title>
+  <script src="auth.js"></script>
+  <style>
+    body { background-color: #0e1a2b; color: white; font-family: Arial; padding: 20px; }
+    .card { background: #1e293b; padding: 20px; margin: 10px 0; border-radius: 8px; }
+    input, select, button { margin: 5px 0; padding: 8px; border-radius: 4px; }
+    table { width: 100%; background: #1e1e1e; color: white; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #333; padding: 8px; }
+  </style>
+</head>
+<body onload="checkLogin()">
+  <h1>Bienvenue dans le Dashboard FiaXY</h1>
+  <button onclick="logout()">Se déconnecter</button>
+
+  <div class="card">
+    <h2>Créer une commande</h2>
+    <form id="formCommande">
+      <input type="text" id="client" placeholder="Nom du client" required><br>
+      <select id="typeCarte">
+        <option>Personal</option>
+        <option>Business</option>
+      </select><br>
+      <input type="number" id="montantCommande" placeholder="Montant ($USD)" required><br>
+      <button type="submit">Ajouter commande</button>
+    </form>
+    <div id="msgSuccessCommande" style="display:none;color:lime;">Commande enregistrée !</div>
+  </div>
+
+  <div class="card">
+    <h2>Historique des commandes</h2>
+    <button onclick="exporterCSV()">📥 Exporter en CSV</button>
+    <table>
+      <thead><tr><th>#</th><th>Client</th><th>Carte</th><th>Montant</th><th>Date</th></tr></thead>
+      <tbody id="historiqueCommandes"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Paiement MonCash</h2>
+    <form id="moncashForm">
+      <input type="tel" id="numero" placeholder="509XXXXXXXX" required><br>
+      <input type="number" id="montant" placeholder="Montant ($USD)" required><br>
+      <button type="submit">Payer</button>
+    </form>
+    <div id="successMsg" style="display:none;color:lime;">✅ Paiement effectué avec succès !</div>
+  </div>
+
+  <script>
+    const commandes = [];
+    document.getElementById("formCommande").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const client = document.getElementById("client").value;
+      const type = document.getElementById("typeCarte").value;
+      const montant = document.getElementById("montantCommande").value;
+      const date = new Date().toLocaleString();
+      commandes.push({ client, type, montant, date });
+      updateHistorique();
+      document.getElementById("msgSuccessCommande").style.display = "block";
+      this.reset();
+    });
+
+    function updateHistorique() {
+      const body = document.getElementById("historiqueCommandes");
+      body.innerHTML = "";
+      commandes.forEach((cmd, i) => {
+        body.innerHTML += `<tr><td>${i+1}</td><td>${cmd.client}</td><td>${cmd.type}</td><td>$${cmd.montant}</td><td>${cmd.date}</td></tr>`;
+      });
+    }
+
+    function exporterCSV() {
+      let csv = "#;Nom client;Type carte;Montant;Date\n";
+      commandes.forEach((cmd, i) => {
+        csv += `${i+1};${cmd.client};${cmd.type};${cmd.montant};${cmd.date}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "commandes_fiaxy.csv";
+      a.click();
+    }
+
+    document.getElementById("moncashForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      document.getElementById("successMsg").style.display = "block";
+      this.reset();
+    });
+  </script>
+</body>
+</html>
